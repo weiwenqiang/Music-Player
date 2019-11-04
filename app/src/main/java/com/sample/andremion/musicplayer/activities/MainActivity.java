@@ -16,7 +16,9 @@
 
 package com.sample.andremion.musicplayer.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -25,10 +27,16 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.sample.andremion.musicplayer.R;
 import com.sample.andremion.musicplayer.music.MusicContent;
 import com.sample.andremion.musicplayer.view.RecyclerViewAdapter;
+import com.sample.andremion.musicplayer.wwq.FileUtils;
+import com.sample.andremion.musicplayer.wwq.Music;
+import com.sample.andremion.musicplayer.wwq.MusicAdapter;
+
+import java.util.List;
 
 public class MainActivity extends PlayerActivity {
 
@@ -39,11 +47,26 @@ public class MainActivity extends PlayerActivity {
     private View mProgressView;
     private View mFabView;
 
+    private RelativeLayout playlist;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_list);
-
+        /**
+         * 动态权限申请
+         */
+        String[] permissions = new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.LOCATION_HARDWARE,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.RECORD_AUDIO
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(permissions, 1);
+        }
         //
         mCoverView = findViewById(R.id.cover);
         mTitleView = findViewById(R.id.title);
@@ -52,11 +75,23 @@ public class MainActivity extends PlayerActivity {
         mProgressView = findViewById(R.id.progress);
         mFabView = findViewById(R.id.fab);
 
+        playlist = findViewById(R.id.playlist);
+
         // Set the recycler adapter
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.tracks);
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.tracks);
         assert recyclerView != null;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new RecyclerViewAdapter(MusicContent.ITEMS));
+
+
+
+//        recyclerView.setAdapter(new RecyclerViewAdapter(MusicContent.ITEMS));
+        playlist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                List<Music> musicList = FileUtils.getInstance(MainActivity.this).getMusics();
+                recyclerView.setAdapter(new MusicAdapter(musicList));
+            }
+        });
     }
 
     public void onFabClick(View view) {

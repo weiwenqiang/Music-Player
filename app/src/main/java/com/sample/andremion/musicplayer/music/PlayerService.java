@@ -22,6 +22,10 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.piterwilson.audio.MP3RadioStreamPlayer;
+
+import java.io.IOException;
+
 public class PlayerService extends Service {
 
     private static final String TAG = PlayerService.class.getSimpleName();
@@ -77,14 +81,23 @@ public class PlayerService extends Service {
         return DURATION;
     }
 
-    private static class Worker extends Thread {
+    private class Worker extends Thread {
 
         boolean paused = false;
         int position = 0;
-
+        MP3RadioStreamPlayer player = new MP3RadioStreamPlayer();
         @Override
         public void run() {
             try {
+//                player.setUrlString(PlayerService.this, true, "http://www.stephaniequinn.com/Music/Commercial%20DEMO%20-%2005.mp3");
+                player.setUrlString("/storage/emulated/0/wwq/音乐/绿钻/英文/卢广仲 - 100种生活.mp3");
+                try {
+                    player.play();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
                 while (position < DURATION) {
                     sleep(1000);
                     if (!paused) {
